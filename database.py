@@ -25,11 +25,12 @@ def init_db():
         )
     ''')
 
-    # Insert sample users if empty
-    cursor.execute('SELECT COUNT(*) FROM users')
-    if cursor.fetchone()[0] == 0:
-        sample_users = ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve']
-        cursor.executemany('INSERT INTO users (name) VALUES (?)', [(name,) for name in sample_users])
+    # Insert sample users if not already present
+    sample_users = ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve']
+    for name in sample_users:
+        cursor.execute('SELECT 1 FROM users WHERE name = ?', (name,))
+        if cursor.fetchone() is None:
+            cursor.execute('INSERT INTO users (name) VALUES (?)', (name,))
 
     conn.commit()
     conn.close()
@@ -65,7 +66,10 @@ def add_users_from_excel(df):
     conn = sqlite3.connect('dinner_poll.db')
     cursor = conn.cursor()
     for name in df.iloc[:, 0]:  # First column
-        cursor.execute('INSERT OR IGNORE INTO users (name) VALUES (?)', (str(name).strip(),))
+        name_str = str(name).strip()
+        cursor.execute('SELECT 1 FROM users WHERE name = ?', (name_str,))
+        if cursor.fetchone() is None:
+            cursor.execute('INSERT INTO users (name) VALUES (?)', (name_str,))
     conn.commit()
     conn.close()
 
