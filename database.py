@@ -1,23 +1,35 @@
 from datetime import datetime, timedelta
 import pytz
 from sqlalchemy.orm import sessionmaker
+from alembic.config import Config
+from alembic import command
 from models import Base, User, Submission, AdminSettings, engine
 
 IST_TZ = 'Asia/Kolkata'
 
-# Create tables
-Base.metadata.create_all(bind=engine)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
+def run_migrations():
+    alembic_cfg = Config("alembic.ini")
+    command.upgrade(alembic_cfg, "head")
+
+
 def init_db():
+    # Run migrations first
+    try:
+        run_migrations()
+    except Exception:
+        # Fallback to creating tables if migrations fail
+        Base.metadata.create_all(bind=engine)
+
     db = SessionLocal()
     try:
         # Check if admin settings exist, if not create default
         admin = db.query(AdminSettings).filter(AdminSettings.id == 1).first()
         if not admin:
             admin = AdminSettings(
-                id=1, password='admin123', poll_end_time='18:30')
+                id=1, password='admin123', poll_end_time='18:30', poll_manually_ended=False)
             db.add(admin)
             db.commit()
     finally:
@@ -141,6 +153,10 @@ def end_poll(date_str):
     try:
         db.query(Submission).filter(
             Submission.submission_date == date_str).delete()
+        # Mark poll as manually ended
+        admin = db.query(AdminSettings).filter(AdminSettings.id == 1).first()
+        if admin:
+            admin.poll_manually_ended = True
         db.commit()
     finally:
         db.close()
@@ -199,6 +215,26 @@ def reset_poll_time():
         admin = db.query(AdminSettings).filter(AdminSettings.id == 1).first()
         if admin:
             admin.poll_end_time = '18:30'
+            db.commit()
+    finally:
+        db.close()
+
+
+def is_poll_manually_ended():
+    db = SessionLocal()
+    try:
+        admin = db.query(AdminSettings).filter(AdminSettings.id == 1).first()
+        return admin.poll_manually_ended if admin else False
+    finally:
+        db.close()
+
+
+def set_poll_manually_ended(ended=True):
+    db = SessionLocal()
+    try:
+        admin = db.query(AdminSettings).filter(AdminSettings.id == 1).first()
+        if admin:
+            admin.poll_manually_ended = ended
             db.commit()
     finally:
         db.close()

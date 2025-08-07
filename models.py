@@ -31,6 +31,7 @@ class AdminSettings(Base):
     id = Column(Integer, primary_key=True)
     password = Column(String, nullable=False)
     poll_end_time = Column(String(5), default='18:30')
+    poll_manually_ended = Column(Boolean, default=False)
 
 
 # Database setup

@@ -1,8 +1,15 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from datetime import date
-from database import init_db, get_users, get_user_submission_status, submit_poll, get_ist_date, add_user, get_poll_stats, end_poll, remove_user, is_poll_time_active, get_admin_password, update_admin_password, get_poll_end_time, extend_poll, reset_poll_time
+from database import init_db, get_users, get_user_submission_status, submit_poll, get_ist_date, add_user, get_poll_stats, end_poll, remove_user, is_poll_time_active, get_admin_password, update_admin_password, get_poll_end_time, extend_poll, reset_poll_time, is_poll_manually_ended, set_poll_manually_ended
+from alembic.config import Config
+from alembic import command
+
+
+def run_migrations():
+    alembic_cfg = Config("alembic.ini")
+    command.upgrade(alembic_cfg, "head")
+
 
 # Initialize database
 init_db()
@@ -53,11 +60,10 @@ if admin_mode == "Admin":
     with col1:
         if st.button("End Today's Poll"):
             end_poll(today)
-            st.session_state.poll_active = False
             st.success("Poll ended and submissions cleared")
     with col2:
         if st.button("Reactivate Poll"):
-            st.session_state.poll_active = True
+            set_poll_manually_ended(False)
             st.success("Poll reactivated")
     with col3:
         if st.button("Reset Time (6:30 PM)"):
@@ -182,7 +188,7 @@ if admin_mode == "User":
         st.error(
             f"⏰ Today's poll has ended at {get_poll_end_time()} IST. Please check back tomorrow.")
         st.stop()
-    elif not st.session_state.poll_active:
+    elif is_poll_manually_ended():
         st.error(
             "⏰ Today's poll has been ended by admin. Please check back tomorrow.")
         st.stop()
