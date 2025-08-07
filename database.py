@@ -20,14 +20,6 @@ def init_db():
                 id=1, password='admin123', poll_end_time='18:30')
             db.add(admin)
             db.commit()
-
-        # Add sample users if none exist
-        if db.query(User).count() == 0:
-            sample_emp_ids = [1001, 1002, 1003, 1004, 1005]
-            for emp_id in sample_emp_ids:
-                user = User(emp_id=emp_id)
-                db.add(user)
-            db.commit()
     finally:
         db.close()
 
