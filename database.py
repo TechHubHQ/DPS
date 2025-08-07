@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import datetime, date
+import pytz
 
 def init_db():
     conn = sqlite3.connect('dinner_poll.db')
@@ -73,9 +74,14 @@ def add_users_from_excel(df):
     conn.commit()
     conn.close()
 
+def get_ist_date():
+    ist = pytz.timezone('Asia/Kolkata')
+    return datetime.now(ist).date()
+
 def clear_old_submissions():
     conn = sqlite3.connect('dinner_poll.db')
     cursor = conn.cursor()
-    cursor.execute('DELETE FROM submissions WHERE submission_date < date("now", "-2 days")')
+    current_ist_date = str(get_ist_date())
+    cursor.execute('DELETE FROM submissions WHERE submission_date < ?', (current_ist_date,))
     conn.commit()
     conn.close()

@@ -1,17 +1,18 @@
 import streamlit as st
 import pandas as pd
 from datetime import date
-from database import init_db, get_users, get_user_submission_status, submit_poll, add_users_from_excel
+from database import init_db, get_users, get_user_submission_status, submit_poll, add_users_from_excel, get_ist_date
 
 # Initialize database
 init_db()
 
 st.title("🍽️ Dinner Polling System")
-st.write(f"Today's Date: {date.today()}")
+ist_today = get_ist_date()
+st.write(f"Today's Date (IST): {ist_today}")
 
 # Get all users
 users = get_users()
-today = str(date.today())
+today = str(ist_today)
 
 # Display current status
 st.subheader("Current Status")
