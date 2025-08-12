@@ -188,8 +188,7 @@ def get_poll_end_time():
     db = SessionLocal()
     try:
         admin = db.query(AdminSettings).filter(AdminSettings.id == 1).first()
-        # return admin.poll_end_time if admin else '19:30'
-        return '20:30'
+        return admin.poll_end_time if admin else '18:30'
     finally:
         db.close()
 
