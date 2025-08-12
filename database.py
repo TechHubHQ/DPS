@@ -283,3 +283,165 @@ def get_user_by_emp_id(emp_id):
         return None
     finally:
         db.close()
+
+
+def reset_poll_submissions(date_str):
+    """Reset all poll submissions for a specific date"""
+    db = SessionLocal()
+    try:
+        # Delete all submissions for the given date
+        db.query(Submission).filter(
+            Submission.submission_date == date_str).delete()
+
+        # Reset poll manually ended flag
+        admin = db.query(AdminSettings).filter(AdminSettings.id == 1).first()
+        if admin:
+            admin.poll_manually_ended = False
+
+        db.commit()
+        return True
+    except Exception:
+        db.rollback()
+        return False
+    finally:
+        db.close()
+
+
+def reset_user_submission(user_id, date_str):
+    """Reset a specific user's submission for a date"""
+    db = SessionLocal()
+    try:
+        # First check if submission exists
+        submission = db.query(Submission).filter(
+            Submission.user_id == user_id,
+            Submission.submission_date == date_str
+        ).first()
+        
+        if submission:
+            # Delete the submission record
+            db.delete(submission)
+            db.commit()
+            
+            # Verify deletion was successful
+            verify_submission = db.query(Submission).filter(
+                Submission.user_id == user_id,
+                Submission.submission_date == date_str
+            ).first()
+            
+            return verify_submission is None
+        else:
+            # No submission found to reset
+            return False
+    except Exception as e:
+        db.rollback()
+        return False
+    finally:
+        db.close()
+
+
+def get_poll_history(days=7):
+    """Get poll history for the last N days"""
+    db = SessionLocal()
+    try:
+        from sqlalchemy import func, desc
+
+        # Get submission counts by date
+        history = db.query(
+            Submission.submission_date,
+            func.count(Submission.id).label('total_submissions')
+        ).filter(
+            Submission.submitted == True
+        ).group_by(
+            Submission.submission_date
+        ).order_by(
+            desc(Submission.submission_date)
+        ).limit(days).all()
+
+        return history
+    finally:
+        db.close()
+
+
+def get_user_submission_history(emp_id, days=30):
+    """Get submission history for a specific user"""
+    db = SessionLocal()
+    try:
+        from sqlalchemy import desc
+
+        user = db.query(User).filter(User.emp_id == emp_id).first()
+        if not user:
+            return []
+
+        history = db.query(
+            Submission.submission_date,
+            Submission.submitted
+        ).filter(
+            Submission.user_id == user.id
+        ).order_by(
+            desc(Submission.submission_date)
+        ).limit(days).all()
+
+        return history
+    finally:
+        db.close()
+
+
+def export_poll_data(date_str):
+    """Export poll data for a specific date"""
+    db = SessionLocal()
+    try:
+        from sqlalchemy import func
+
+        data = db.query(
+            User.emp_id,
+            User.emp_name,
+            func.coalesce(Submission.submitted, 0).label('submitted')
+        ).outerjoin(
+            Submission,
+            (User.id == Submission.user_id) & (
+                Submission.submission_date == date_str)
+        ).order_by(User.emp_id).all()
+
+        return data
+    finally:
+        db.close()
+
+
+def get_admin_dashboard_stats():
+    """Get comprehensive stats for admin dashboard"""
+    db = SessionLocal()
+    try:
+        from sqlalchemy import func, distinct
+
+        # Total users
+        total_users = db.query(func.count(User.id)).scalar()
+
+        # Today's submissions
+        today = str(get_ist_date())
+        today_submissions = db.query(func.count(Submission.id)).filter(
+            Submission.submission_date == today,
+            Submission.submitted == True
+        ).scalar()
+
+        # Total submissions ever
+        total_submissions = db.query(func.count(Submission.id)).filter(
+            Submission.submitted == True
+        ).scalar()
+
+        # Active days (days with at least one submission)
+        active_days = db.query(func.count(distinct(Submission.submission_date))).filter(
+            Submission.submitted == True
+        ).scalar()
+
+        # Average daily participation
+        avg_participation = total_submissions / active_days if active_days > 0 else 0
+
+        return {
+            'total_users': total_users or 0,
+            'today_submissions': today_submissions or 0,
+            'total_submissions': total_submissions or 0,
+            'active_days': active_days or 0,
+            'avg_participation': round(avg_participation, 2)
+        }
+    finally:
+        db.close()

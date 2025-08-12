@@ -56,7 +56,12 @@ body {
   width: 100%;
 }
 
-.main-header .d-flex {
+.header-top {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.header-bottom {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -77,13 +82,17 @@ body {
   color: rgba(255, 255, 255, 0.95);
   font-size: 1.1rem;
   font-weight: 500;
-  margin-top: 0.5rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
 }
 
 .timer-container {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .timer-box {
@@ -145,6 +154,11 @@ body {
   border: 1px solid #f0f0f0;
   position: relative;
   overflow: hidden;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .status-card::before {
@@ -186,26 +200,105 @@ body {
   letter-spacing: 0.05em;
 }
 
-/* ===== Enhanced Progress Bar ===== */
+/* ===== Enhanced Progress Section ===== */
+.progress-section {
+  background: #ffffff;
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f0f0f0;
+}
+
+/* ===== Combined Poll Section (Progress + Form) ===== */
+.combined-poll-section {
+  background: #ffffff;
+  border-radius: 20px;
+  margin: 2rem 0;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  border: 1px solid #e9ecef;
+  overflow: hidden;
+}
+
+.progress-section-integrated {
+  padding: 2rem 2rem 1.5rem 2rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-bottom: 1px solid #e9ecef;
+}
+
+.poll-form-integrated {
+  padding: 2rem;
+  background: #ffffff;
+}
+
+.poll-form-title {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem 0;
+  text-align: center;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.progress-header h4 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.progress-stats {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+}
+
+.stat-item.submitted {
+  background: rgba(40, 167, 69, 0.1);
+  border-color: rgba(40, 167, 69, 0.3);
+  color: #28a745;
+}
+
+.stat-item.pending {
+  background: rgba(220, 53, 69, 0.1);
+  border-color: rgba(220, 53, 69, 0.3);
+  color: #dc3545;
+}
+
+.stat-item.total {
+  background: rgba(102, 126, 234, 0.1);
+  border-color: rgba(102, 126, 234, 0.3);
+  color: #667eea;
+}
+
 .progress-container {
   background: #f8f9fa;
   border-radius: 25px;
   overflow: hidden;
-  height: 35px;
-  margin: 2rem 0;
+  height: 40px;
+  margin: 1rem 0;
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
   border: 2px solid #e9ecef;
   position: relative;
-}
-
-.progress-container::before {
-  content: 'Poll Progress';
-  position: absolute;
-  top: -30px;
-  left: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
 }
 
 .progress-bar {
@@ -218,16 +311,50 @@ body {
   );
   background-size: 200% 100%;
   animation: shimmer 3s ease-in-out infinite;
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  color: white;
-  font-size: 1rem;
-  font-weight: 700;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Show progress bar only when there's actual progress */
+.progress-bar[style*="width: 0%"] {
+  min-width: 0;
+  display: none;
+}
+
+.progress-bar[style*="width: 0.0%"] {
+  min-width: 0;
+  display: none;
+}
+
+/* Empty progress state */
+.progress-empty {
+  height: 100%;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #dee2e6;
+  border-radius: 20px;
+}
+
+.progress-text-empty {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.progress-text {
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  z-index: 2;
   position: relative;
-  min-width: 60px;
 }
 
 .progress-bar::after {
@@ -244,6 +371,17 @@ body {
     transparent 100%
   );
   animation: progress-shine 2s ease-in-out infinite;
+  z-index: 1;
+}
+
+.progress-footer {
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.progress-footer small {
+  color: var(--text-secondary);
+  font-style: italic;
 }
 
 @keyframes shimmer {
@@ -254,6 +392,52 @@ body {
 @keyframes progress-shine {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
+}
+
+/* Progress bar animation on update */
+.progress-bar[data-width] {
+  animation: progress-update 0.8s ease-out, shimmer 3s ease-in-out infinite;
+}
+
+.progress-animated {
+  animation: progress-update 1s ease-out, shimmer 3s ease-in-out infinite;
+  transform-origin: left center;
+}
+
+@keyframes progress-update {
+  0% {
+    transform: scaleX(0.8);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scaleX(1.02);
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* Enhanced progress bar pulse effect when updated */
+.progress-bar.progress-animated::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.2);
+  animation: progress-pulse 2s ease-in-out;
+  z-index: 3;
+}
+
+@keyframes progress-pulse {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* ===== User List ===== */
@@ -276,13 +460,14 @@ body {
   border-left-color: var(--secondary-color);
 }
 
-/* ===== Poll Form ===== */
+/* ===== Poll Form (Legacy - keeping for compatibility) ===== */
 .poll-form {
   background: #ffffff;
   padding: 2.5rem;
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
-  margin-top: 2rem;
+  margin-top: 0;
+  margin-bottom: 2rem;
   border: 1px solid #f0f0f0;
 }
 
@@ -292,6 +477,31 @@ body {
   margin-bottom: 1.5rem;
   text-align: center;
   font-weight: 700;
+}
+
+/* ===== Streamlit Component Fixes for Combined Section ===== */
+.combined-poll-section .element-container {
+  margin-top: 0 !important;
+  margin-bottom: 1rem !important;
+}
+
+.combined-poll-section .stMarkdown {
+  margin-top: 0 !important;
+  margin-bottom: 1rem !important;
+}
+
+.combined-poll-section .stTabs {
+  margin-top: 0 !important;
+}
+
+/* Remove any unwanted spacing around combined section */
+.progress-section + .element-container {
+  margin-top: 0 !important;
+}
+
+.element-container:has(.combined-poll-section) {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
 }
 
 /* ===== Enhanced Inputs ===== */
@@ -388,18 +598,58 @@ body {
 }
 
 /* ===== Metric Cards for Admin ===== */
+.admin-metric-card {
+  background: #ffffff;
+  border-radius: 15px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+  position: relative;
+  overflow: hidden;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.admin-metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+}
+
+.admin-metric-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
 .metric-value {
-  font-size: 2.5rem;
+  font-size: 2.2rem;
   font-weight: 800;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
+  line-height: 1;
+  color: var(--text-primary);
 }
 
 .metric-label {
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
   color: #6c757d;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  line-height: 1.1;
+  text-align: center;
+  max-width: 100%;
 }
 
 /* ===== Additional Streamlit Component Overrides ===== */
@@ -455,6 +705,21 @@ body {
     padding-left: 1rem;
     padding-right: 1rem;
   }
+  
+  /* Admin dashboard cards responsive fixes */
+  .admin-metric-card {
+    padding: 1.2rem 0.8rem;
+    min-height: 90px;
+  }
+  
+  .metric-value {
+    font-size: 1.8rem;
+  }
+  
+  .metric-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+  }
 }
 
 @media (max-width: 768px) {
@@ -462,17 +727,30 @@ body {
     padding: 1.5rem;
   }
   
-  .main-header .d-flex {
-    flex-direction: column;
-    text-align: center;
+  .header-top {
+    margin-bottom: 1rem;
+  }
+  
+  .header-bottom {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
   }
   
   .main-title {
     font-size: 2rem;
   }
   
+  .date-info {
+    font-size: 1rem;
+  }
+  
+  .timer-container {
+    margin-left: 0;
+  }
+  
   .timer-box {
-    margin-top: 1rem;
     font-size: 1rem;
     padding: 0.75rem 1.25rem;
   }
@@ -490,22 +768,79 @@ body {
     font-size: 2.5rem;
   }
   
-  .progress-container {
-    height: 30px;
+  .progress-section {
+    padding: 1.25rem;
     margin: 1.5rem 0;
   }
   
-  .progress-bar {
+  .combined-poll-section {
+    margin: 1.5rem 0;
+  }
+  
+  .progress-section-integrated {
+    padding: 1.5rem 1.25rem 1rem 1.25rem;
+  }
+  
+  .poll-form-integrated {
+    padding: 1.5rem 1.25rem;
+  }
+  
+  .poll-form-title {
+    font-size: 1.3rem;
+  }
+  
+  .progress-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .progress-stats {
+    gap: 0.5rem;
+  }
+  
+  .stat-item {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.6rem;
+  }
+  
+  .progress-container {
+    height: 35px;
+    margin: 1rem 0;
+  }
+  
+  .progress-text {
+    font-size: 0.9rem;
+  }
+  
+  .progress-text-empty {
     font-size: 0.9rem;
   }
   
   .poll-form {
     padding: 1.5rem;
-    margin-top: 1rem;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
   }
   
   .section {
     padding: 1.5rem;
+  }
+  
+  /* Admin dashboard cards for tablet */
+  .admin-metric-card {
+    padding: 1rem 0.6rem;
+    min-height: 80px;
+  }
+  
+  .metric-value {
+    font-size: 1.5rem;
+  }
+  
+  .metric-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
   }
 }
 
@@ -520,8 +855,37 @@ body {
     margin-bottom: 1.5rem;
   }
   
+  .header-top {
+    margin-bottom: 1rem;
+  }
+  
+  .header-bottom {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+  }
+  
   .main-title {
     font-size: 1.75rem;
+  }
+  
+  .date-info {
+    font-size: 0.95rem;
+    justify-content: center;
+  }
+  
+  .timer-container {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .timer-box {
+    width: 100%;
+    text-align: center;
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem;
   }
   
   .status-card {
@@ -532,8 +896,57 @@ body {
     font-size: 2rem;
   }
   
+  .progress-section {
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+  
+  .combined-poll-section {
+    margin: 1rem 0;
+  }
+  
+  .progress-section-integrated {
+    padding: 1.25rem 1rem 0.75rem 1rem;
+  }
+  
+  .poll-form-integrated {
+    padding: 1.25rem 1rem;
+  }
+  
+  .poll-form-title {
+    font-size: 1.2rem;
+  }
+  
+  .progress-header h4 {
+    font-size: 1.1rem;
+  }
+  
+  .progress-stats {
+    gap: 0.25rem;
+  }
+  
+  .stat-item {
+    font-size: 0.75rem;
+    padding: 0.15rem 0.5rem;
+  }
+  
+  .progress-container {
+    height: 30px;
+    margin: 0.75rem 0;
+  }
+  
+  .progress-text {
+    font-size: 0.85rem;
+  }
+  
+  .progress-text-empty {
+    font-size: 0.85rem;
+  }
+  
   .poll-form {
     padding: 1.25rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
   }
   
   .stButton > button {
@@ -544,6 +957,23 @@ body {
   .stTextInput > div > div > input {
     padding: 0.875rem 1rem;
     font-size: 1rem;
+  }
+  
+  /* Admin dashboard cards for mobile */
+  .admin-metric-card {
+    padding: 0.8rem 0.4rem;
+    min-height: 70px;
+  }
+  
+  .metric-value {
+    font-size: 1.2rem;
+  }
+  
+  .metric-label {
+    font-size: 0.65rem;
+    letter-spacing: 0;
+    line-height: 1;
+    text-transform: none;
   }
 }
 

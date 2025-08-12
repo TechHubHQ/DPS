@@ -8,7 +8,9 @@ from database import (
     init_db, get_users, get_user_submission_status, submit_poll, get_ist_date, add_user,
     get_poll_stats, end_poll, remove_user, is_poll_time_active, get_admin_password,
     update_admin_password, get_poll_end_time, extend_poll, reset_poll_time,
-    is_poll_manually_ended, set_poll_manually_ended, bulk_add_users
+    is_poll_manually_ended, set_poll_manually_ended, bulk_add_users, reset_poll_submissions,
+    reset_user_submission, get_poll_history, get_user_submission_history, export_poll_data,
+    get_admin_dashboard_stats, get_user_by_emp_id
 )
 from alembic.config import Config
 from alembic import command
@@ -138,6 +140,55 @@ if admin_mode == "Admin":
         ist_today = get_ist_date()
         today = str(ist_today)
 
+        # Enhanced Admin Dashboard Stats
+        st.subheader("📈 Admin Dashboard Overview")
+        dashboard_stats = get_admin_dashboard_stats()
+
+        # Enhanced metrics display with responsive admin cards
+        col1, col2, col3, col4, col5 = st.columns(5)
+        with col1:
+            st.markdown(
+                f"""
+                <div class="admin-metric-card">
+                    <div class="metric-value" style="color: #667eea;">{dashboard_stats['total_users']}</div>
+                    <div class="metric-label">Total Users</div>
+                </div>
+                """, unsafe_allow_html=True)
+        with col2:
+            st.markdown(
+                f"""
+                <div class="admin-metric-card">
+                    <div class="metric-value" style="color: #28a745;">{dashboard_stats['today_submissions']}</div>
+                    <div class="metric-label">Today's Submissions</div>
+                </div>
+                """, unsafe_allow_html=True)
+        with col3:
+            st.markdown(
+                f"""
+                <div class="admin-metric-card">
+                    <div class="metric-value" style="color: #17a2b8;">{dashboard_stats['total_submissions']}</div>
+                    <div class="metric-label">Total Submissions</div>
+                </div>
+                """, unsafe_allow_html=True)
+        with col4:
+            st.markdown(
+                f"""
+                <div class="admin-metric-card">
+                    <div class="metric-value" style="color: #ffc107;">{dashboard_stats['active_days']}</div>
+                    <div class="metric-label">Active Days</div>
+                </div>
+                """, unsafe_allow_html=True)
+        with col5:
+            st.markdown(
+                f"""
+                <div class="admin-metric-card">
+                    <div class="metric-value" style="color: #6f42c1;">{dashboard_stats['avg_participation']}</div>
+                    <div class="metric-label">Avg Daily Participation</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        st.markdown("---")
+
         # Poll controls
         st.subheader("📊 Poll Controls")
         hours, minutes, seconds, total_seconds, ended = get_timer_info()
@@ -146,22 +197,32 @@ if admin_mode == "Admin":
                 f"⏰ **Current Poll End Time: {get_poll_end_time()} IST** | Time Remaining: {hours:02d}:{minutes:02d}:{seconds:02d}")
         else:
             st.warning(f"⏰ **Poll Ended at: {get_poll_end_time()} IST**")
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                if st.button("🛑 End Today's Poll", key="end_poll"):
-                    end_poll(today)
-                    st.success("✅ Poll ended and submissions cleared")
+
+        # Enhanced poll control buttons
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            if st.button("🛑 End Today's Poll", key="end_poll", help="End poll and clear all submissions"):
+                end_poll(today)
+                st.success("✅ Poll ended and submissions cleared")
+                st.rerun()
+        with col2:
+            if st.button("🔄 Reset Poll", key="reset_poll", help="Reset all submissions and reactivate poll"):
+                if reset_poll_submissions(today):
+                    st.success(
+                        "✅ Poll reset successfully - all submissions cleared")
                     st.rerun()
-            with col2:
-                if st.button("🔄 Reactivate Poll", key="reactivate_poll"):
-                    set_poll_manually_ended(False)
-                    st.success("✅ Poll reactivated")
-                    st.rerun()
-            with col3:
-                if st.button("⏰ Reset Time (6:30 PM)", key="reset_time"):
-                    reset_poll_time()
-                    st.success("✅ Poll time reset to 6:30 PM")
-                    st.rerun()
+                else:
+                    st.error("❌ Failed to reset poll")
+        with col3:
+            if st.button("🔄 Reactivate Poll", key="reactivate_poll", help="Reactivate poll without clearing submissions"):
+                set_poll_manually_ended(False)
+                st.success("✅ Poll reactivated")
+                st.rerun()
+        with col4:
+            if st.button("⏰ Reset Time (6:30 PM)", key="reset_time", help="Reset poll end time to default"):
+                reset_poll_time()
+                st.success("✅ Poll time reset to 6:30 PM")
+                st.rerun()
 
         # Poll extension
         st.subheader("⏱️ Extend Poll Time")
@@ -232,6 +293,83 @@ if admin_mode == "Admin":
                             st.error(f"❌ Failed: {', '.join(errors)}")
                         if added:
                             st.rerun()
+
+        # Additional Admin Features
+        st.markdown("---")
+        st.subheader("📈 Advanced Admin Features")
+
+        # Poll History and Analytics
+        with st.expander("📉 Poll History & Analytics", expanded=False):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown("**📅 Recent Poll History**")
+                history = get_poll_history(7)
+                if history:
+                    history_df = pd.DataFrame(
+                        history, columns=['Date', 'Submissions'])
+                    st.dataframe(
+                        history_df, use_container_width=True, hide_index=True)
+                else:
+                    st.info("No poll history available")
+
+            with col2:
+                st.markdown("**📊 User Lookup**")
+                lookup_emp_id = st.number_input(
+                    "Employee ID for History:", min_value=1, step=1, key="lookup_user")
+                if st.button("🔍 Lookup User History", key="lookup_history"):
+                    user_history = get_user_submission_history(
+                        lookup_emp_id, 10)
+                    if user_history:
+                        user_df = pd.DataFrame(user_history, columns=[
+                                               'Date', 'Submitted'])
+                        user_df['Status'] = user_df['Submitted'].apply(
+                            lambda x: '✅ Yes' if x else '❌ No')
+                        st.dataframe(
+                            user_df[['Date', 'Status']], use_container_width=True, hide_index=True)
+                    else:
+                        st.warning("No history found for this user")
+
+        # Data Export
+        with st.expander("💾 Data Export & Management", expanded=False):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown("**📊 Export Today's Data**")
+                if st.button("💾 Export Today's Poll Data", key="export_today"):
+                    export_data = export_poll_data(today)
+                    if export_data:
+                        export_df = pd.DataFrame(export_data, columns=[
+                                                 'Employee ID', 'Employee Name', 'Submitted'])
+                        export_df['Status'] = export_df['Submitted'].apply(
+                            lambda x: 'Submitted' if x else 'Pending')
+                        csv = export_df.to_csv(index=False)
+                        st.download_button(
+                            label="💾 Download CSV",
+                            data=csv,
+                            file_name=f"poll_data_{today}.csv",
+                            mime="text/csv"
+                        )
+                        st.success(f"✅ Data exported for {today}")
+                    else:
+                        st.warning("No data to export")
+
+            with col2:
+                st.markdown("**🗑️ Individual User Reset**")
+                reset_emp_id = st.number_input(
+                    "Employee ID to Reset:", min_value=1, step=1, key="reset_user_id")
+                if st.button("🔄 Reset User Submission", key="reset_individual_user"):
+                    user_info = get_user_by_emp_id(reset_emp_id)
+                    if user_info:
+                        if reset_user_submission(user_info['id'], today):
+                            st.success(
+                                f"✅ Reset submission for {user_info['emp_name']} (ID: {reset_emp_id})")
+                            st.rerun()
+                        else:
+                            st.warning(
+                                f"No submission found for {user_info['emp_name']} today")
+                    else:
+                        st.error("❌ Employee ID not found")
+
+        st.markdown("---")
 
         col1, col2 = st.columns(2)
         with col1:
@@ -418,11 +556,11 @@ if admin_mode == "User":
 
     header_html = f"""
     <div class="main-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h1 class="main-title">🍽️ Dinner Polling System</h1>
-                <div class="date-info">Today's Date (IST): {ist_today}</div>
-            </div>
+        <div class="header-top">
+            <h1 class="main-title">🍽️ Dinner Polling System</h1>
+        </div>
+        <div class="header-bottom">
+            <div class="date-info">Today's Date (IST): {ist_today}</div>
             <div class="timer-container">
                 <div class="timer-box" id="timerDisplay">
                     {'Poll ends in ' + f"{hours:02d}:{minutes:02d}:{seconds:02d}" if not ended else 'Poll Ended'}
@@ -502,57 +640,154 @@ if admin_mode == "User":
                     st.markdown(
                         f"<div class='user-list-item'>• {user}</div>", unsafe_allow_html=True)
 
-    # Progress bar
+    # Enhanced Progress bar with real-time updates
     total_users = len(users)
-    progress_percent = (len(submitted_users) / total_users) * \
+    submitted_count = len(submitted_users)
+    pending_count = len(not_submitted_users)
+    progress_percent = (submitted_count / total_users) * \
         100 if total_users else 0
+
+    # Combined progress and poll form section with seamless design
+    current_time = datetime.now().strftime('%H:%M:%S')
     st.markdown(f"""
-    <div class="progress-container">
-        <div class="progress-bar" style="width: {progress_percent}%;">
-            {progress_percent:.1f}%
+    <div class="combined-poll-section">
+        <div class="progress-section-integrated">
+            <div class="progress-header">
+                <h4>📊 Poll Progress</h4>
+                <div class="progress-stats">
+                    <span class="stat-item submitted">✅ {submitted_count} Submitted</span>
+                    <span class="stat-item pending">❌ {pending_count} Pending</span>
+                    <span class="stat-item total">👥 {total_users} Total</span>
+                </div>
+            </div>
+            <div class="progress-container" data-progress="{progress_percent:.1f}">
+                {f'<div class="progress-bar progress-animated" style="width: {progress_percent}%;" data-width="{progress_percent}"><span class="progress-text">{progress_percent:.1f}%</span></div>' if progress_percent > 0 else '<div class="progress-empty"><span class="progress-text-empty">0.0% - No submissions yet</span></div>'}
+            </div>
+            <div class="progress-footer">
+                <small>Progress updates automatically with each submission • Last updated: {current_time}</small>
+            </div>
         </div>
-    </div>
+        <div class="poll-form-integrated">
+            <h3 class="poll-form-title">📝 Submit Your Response</h3>
     """, unsafe_allow_html=True)
 
-    # Poll form
-    st.markdown('<div class="poll-form">', unsafe_allow_html=True)
-    st.subheader("📝 Submit Your Response")
-    employee_id_input = st.text_input(
-        "🆔 Employee ID:", placeholder="Enter your Employee ID (e.g., 1001)")
-    if st.button("🚀 Submit Poll", use_container_width=True):
-        if not employee_id_input.strip():
-            st.warning("⚠️ Please enter your Employee ID.")
-        else:
-            try:
-                employee_id = int(employee_id_input)
-            except ValueError:
-                st.error("❌ Employee ID must be a number.")
+    # Poll form content without the separate container
+    # Title is now handled in the HTML above
+
+    # Create tabs for submit and reset
+    tab1, tab2 = st.tabs(["🚀 Submit Poll", "🔄 Reset My Submission"])
+
+    with tab1:
+        employee_id_input = st.text_input(
+            "🆔 Employee ID:", placeholder="Enter your Employee ID (e.g., 1001)", key="submit_emp_id")
+        if st.button("🚀 Submit Poll", use_container_width=True, key="submit_poll_btn"):
+            if not employee_id_input.strip():
+                st.warning("⚠️ Please enter your Employee ID.")
             else:
-                found_user = next(
-                    ((uid, name) for uid, emp_id, name in users if emp_id == employee_id), None)
-                if found_user:
-                    uid, name = found_user
-                    if get_user_submission_status(uid, today):
-                        st.info(f"ℹ️ {name} has already submitted.")
-                    else:
-                        submit_poll(uid, today)
-                        st.success(
-                            f"🎉 Thanks {name}, your response has been recorded.")
-                        st.balloons()
-                        time.sleep(1)
-                        st.rerun()
+                try:
+                    employee_id = int(employee_id_input)
+                except ValueError:
+                    st.error("❌ Employee ID must be a number.")
                 else:
-                    st.error("❌ Employee ID not found.")
-    st.markdown('</div>', unsafe_allow_html=True)
+                    found_user = next(
+                        ((uid, name) for uid, emp_id, name in users if emp_id == employee_id), None)
+                    if found_user:
+                        uid, name = found_user
+                        if get_user_submission_status(uid, today):
+                            st.info(f"ℹ️ {name} has already submitted today.")
+                            st.info(
+                                "📝 You can reset your submission using the 'Reset My Submission' tab if needed.")
+                        else:
+                            submit_poll(uid, today)
+                            st.success(
+                                f"🎉 Thanks {name}, your response has been recorded.")
+                            st.balloons()
+                            time.sleep(1)
+                            st.rerun()
+                    else:
+                        st.error("❌ Employee ID not found.")
+
+    with tab2:
+        st.markdown("📝 **Reset Your Submission**")
+        st.info(
+            "ℹ️ Use this if you want to change your submission or if you submitted by mistake.")
+
+        reset_employee_id_input = st.text_input(
+            "🆔 Employee ID:", placeholder="Enter your Employee ID (e.g., 1001)", key="reset_emp_id")
+
+        if st.button("🔄 Reset My Submission", use_container_width=True, key="reset_my_submission", type="secondary"):
+            if not reset_employee_id_input.strip():
+                st.warning("⚠️ Please enter your Employee ID.")
+            else:
+                try:
+                    reset_employee_id = int(reset_employee_id_input)
+                except ValueError:
+                    st.error("❌ Employee ID must be a number.")
+                else:
+                    # Simple direct reset like admin - no complex confirmations
+                    user_info = get_user_by_emp_id(reset_employee_id)
+                    if user_info:
+                        if reset_user_submission(user_info['id'], today):
+                            st.success(f"✅ Reset submission for {user_info['emp_name']} (ID: {reset_employee_id})")
+                            st.info("📝 You can now submit again using the 'Submit Poll' tab.")
+                            st.balloons()
+                            time.sleep(1)
+                            st.rerun()
+                        else:
+                            st.warning(f"No submission found for {user_info['emp_name']} today or reset failed")
+                    else:
+                        st.error("❌ Employee ID not found")
+
+    # Close the combined poll section
+    st.markdown('</div></div>', unsafe_allow_html=True)
 
     with st.expander("ℹ️ Need Help?"):
         st.markdown("""
         **How to use this system:**
-        1. Enter your Employee ID
-        2. Click **Submit Poll**
-        3. Get confirmation 🎉
+        
+        **🚀 To Submit:**
+        1. Go to the "Submit Poll" tab
+        2. Enter your Employee ID
+        3. Click **Submit Poll**
+        4. Get confirmation 🎉
+        
+        **🔄 To Reset Your Submission:**
+        1. Go to the "Reset My Submission" tab
+        2. Enter your Employee ID
+        3. Click **Reset My Submission**
+        4. Confirm the reset
+        5. You can now submit again
 
-        **Notes:**
-        - One submission per day
+        **📝 Notes:**
+        - One submission per day (unless reset)
         - Submit before poll end time
+        - You can reset your submission if needed
+        - Resetting allows you to submit again
+        
+        **❓ Common Questions:**
+        - **Can I change my submission?** Yes, use the reset feature
+        - **What if I submitted by mistake?** Use the reset feature
+        - **Can I submit multiple times?** Only after resetting
         """)
+
+        # Add a quick status check
+        st.markdown("---")
+        st.markdown("**🔍 Quick Status Check:**")
+        quick_check_id = st.text_input(
+            "Enter your Employee ID to check status:", key="quick_status_check")
+        if quick_check_id:
+            try:
+                check_emp_id = int(quick_check_id)
+                found_user = next(
+                    ((uid, name) for uid, emp_id, name in users if emp_id == check_emp_id), None)
+                if found_user:
+                    uid, name = found_user
+                    status = get_user_submission_status(uid, today)
+                    if status:
+                        st.success(f"✅ {name}, you have submitted today")
+                    else:
+                        st.info(f"📝 {name}, you haven't submitted today yet")
+                else:
+                    st.error("❌ Employee ID not found")
+            except ValueError:
+                st.error("❌ Please enter a valid Employee ID")
