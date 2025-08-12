@@ -1,0 +1,27 @@
+[theme]
+primaryColor = "#667eea"
+backgroundColor = "#f5f7fa"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#2c3e50"
+font = "sans serif"
+
+[server]
+headless = true
+enableCORS = false
+enableXsrfProtection = false
+# Enable serving files from static directory
+enableStaticServing = true
+
+[browser]
+gatherUsageStats = false
+
+[client]
+# Controls whether uncaught app exceptions and deprecation warnings
+# are displayed in the browser. Options: "full", "stacktrace", "type", "none"
+# Temporarily set to "full" for debugging
+showErrorDetails = "full"
+# Controls whether to display the default sidebar page navigation
+showSidebarNavigation = true
+
+[ui]
+hideTopBar = false

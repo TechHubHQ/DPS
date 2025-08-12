@@ -1,0 +1,595 @@
+/* ===============================
+   Modern Dinner Polling System Styles
+   =============================== */
+
+/* Keep Existing Header Styles */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
+
+:root {
+  --primary-color: #4a90e2;
+  --secondary-color: #50e3c2;
+  --danger-color: #f45b69;
+  --accent-color: #f5a623;
+  --background-light: #fdfdfd;
+  --background-section: #f7f9fb;
+  --text-primary: #2d3e50;
+  --text-secondary: #7a8a99;
+  --border-radius: 14px;
+  --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Global Reset and Container Fixes */
+body {
+  background: var(--background-light);
+  font-family: "Inter", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Fix Streamlit container width issues */
+.main .block-container {
+  padding-top: 2rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  max-width: 100%;
+  width: 100%;
+}
+
+/* Ensure full width utilization */
+.stApp {
+  max-width: 100%;
+}
+
+.element-container {
+  width: 100%;
+}
+
+/* ===== Header with improved layout ===== */
+.main-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  border-radius: 20px;
+  margin-bottom: 2rem;
+  box-shadow: var(--box-shadow);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.main-header .d-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.main-title {
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  letter-spacing: -0.02em;
+}
+
+.date-info {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+.timer-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.timer-box {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  color: white;
+  font-weight: 700;
+  font-family: "SF Mono", Monaco, monospace;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+  border: 2px solid rgba(255,255,255,0.2);
+  animation: pulse 2s infinite;
+}
+
+.timer-ended {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  animation: none;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* ===== Sections ===== */
+.section {
+  background: #ffffff;
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--box-shadow);
+  width: 100%;
+}
+
+.section h3 {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* ===== Status Grid ===== */
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.status-card {
+  background: #ffffff;
+  border-radius: 15px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+  position: relative;
+  overflow: hidden;
+}
+
+.status-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+}
+
+.status-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.status-card.success::before {
+  background: linear-gradient(90deg, #28a745, var(--secondary-color));
+}
+
+.status-card.danger::before {
+  background: linear-gradient(90deg, var(--danger-color), #ff8a80);
+}
+
+.status-number {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.status-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ===== Enhanced Progress Bar ===== */
+.progress-container {
+  background: #f8f9fa;
+  border-radius: 25px;
+  overflow: hidden;
+  height: 35px;
+  margin: 2rem 0;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 2px solid #e9ecef;
+  position: relative;
+}
+
+.progress-container::before {
+  content: 'Poll Progress';
+  position: absolute;
+  top: -30px;
+  left: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    #4a90e2 0%,
+    #50e3c2 50%,
+    #4a90e2 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  position: relative;
+  min-width: 60px;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  animation: progress-shine 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes progress-shine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ===== User List ===== */
+.user-list-item {
+  background: #ffffff;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+  border-radius: 10px;
+  border-left: 4px solid var(--primary-color);
+  font-size: 1rem;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.user-list-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+  border-left-color: var(--secondary-color);
+}
+
+/* ===== Poll Form ===== */
+.poll-form {
+  background: #ffffff;
+  padding: 2.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  margin-top: 2rem;
+  border: 1px solid #f0f0f0;
+}
+
+.poll-form h2 {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+/* ===== Enhanced Inputs ===== */
+.stTextInput > div > div > input {
+  border-radius: 12px;
+  border: 2px solid #e9ecef;
+  padding: 1rem 1.25rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  background: #fafbfc;
+}
+
+.stTextInput > div > div > input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.15);
+  background: white;
+  outline: none;
+}
+
+.stTextInput > div > div > input::placeholder {
+  color: #8e9aaf;
+  font-weight: 400;
+}
+
+/* ===== Enhanced Buttons ===== */
+.stButton > button {
+  background: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--secondary-color) 100%
+  );
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 1rem 2rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.stButton > button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.stButton > button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(74, 144, 226, 0.4);
+}
+
+.stButton > button:hover::before {
+  left: 100%;
+}
+
+/* ===== Enhanced Expander ===== */
+.stExpander {
+  border-radius: 12px;
+  border: 1px solid #e3e8ef;
+  background: var(--background-section);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1rem;
+}
+
+.stExpander > div > div > div {
+  padding: 1.5rem;
+}
+
+/* ===== Admin Panel Styles ===== */
+.admin-panel {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border-left: 5px solid #667eea;
+}
+
+/* ===== Metric Cards for Admin ===== */
+.metric-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.metric-label {
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6c757d;
+}
+
+/* ===== Additional Streamlit Component Overrides ===== */
+.stSelectbox > div > div > div {
+  border-radius: 12px;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.stSelectbox > div > div > div:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.15);
+}
+
+.stNumberInput > div > div > input {
+  border-radius: 12px;
+  border: 2px solid #e9ecef;
+  padding: 1rem 1.25rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  background: #fafbfc;
+}
+
+.stNumberInput > div > div > input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.15);
+  background: white;
+  outline: none;
+}
+
+.stTextArea > div > div > textarea {
+  border-radius: 12px;
+  border: 2px solid #e9ecef;
+  padding: 1rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  background: #fafbfc;
+  font-family: 'Inter', sans-serif;
+}
+
+.stTextArea > div > div > textarea:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.15);
+  background: white;
+  outline: none;
+}
+
+/* ===== Enhanced Responsive Design ===== */
+@media (max-width: 1200px) {
+  .main .block-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-header {
+    padding: 1.5rem;
+  }
+  
+  .main-header .d-flex {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .main-title {
+    font-size: 2rem;
+  }
+  
+  .timer-box {
+    margin-top: 1rem;
+    font-size: 1rem;
+    padding: 0.75rem 1.25rem;
+  }
+  
+  .status-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .status-card {
+    padding: 1.5rem;
+  }
+  
+  .status-number {
+    font-size: 2.5rem;
+  }
+  
+  .progress-container {
+    height: 30px;
+    margin: 1.5rem 0;
+  }
+  
+  .progress-bar {
+    font-size: 0.9rem;
+  }
+  
+  .poll-form {
+    padding: 1.5rem;
+    margin-top: 1rem;
+  }
+  
+  .section {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .main .block-container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .main-header {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .main-title {
+    font-size: 1.75rem;
+  }
+  
+  .status-card {
+    padding: 1.25rem;
+  }
+  
+  .status-number {
+    font-size: 2rem;
+  }
+  
+  .poll-form {
+    padding: 1.25rem;
+  }
+  
+  .stButton > button {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .stTextInput > div > div > input {
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+  }
+}
+
+/* ===== Admin Panel Override Styles ===== */
+/* Override the admin panel to remove white background */
+.admin-panel {
+  background: transparent !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin-bottom: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Style admin titles with gradient background */
+.admin-panel h1 {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  padding: 2rem !important;
+  border-radius: 20px !important;
+  margin: 0 0 2rem 0 !important;
+  text-align: center !important;
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3) !important;
+  letter-spacing: -0.02em !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+}
+
+/* Style admin login section */
+.admin-login-section {
+  background: white;
+  border-radius: 20px;
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border-left: 5px solid #667eea;
+  text-align: center;
+}
+
+/* Style admin content sections */
+.admin-section {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  border: 1px solid #f0f0f0;
+}

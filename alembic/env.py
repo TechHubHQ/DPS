@@ -1,9 +1,14 @@
+import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -18,6 +23,18 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 from models import Base
 target_metadata = Base.metadata
+
+# Get MySQL database URL from environment variables
+DB_HOST = os.getenv('DB_HOST')
+DB_NAME = os.getenv('DB_NAME')
+DB_USERNAME = os.getenv('DB_USERNAME')
+DB_PWD = os.getenv('DB_PWD')
+DB_PORT = os.getenv('DB_PORT', '3306')
+
+DATABASE_URL = f"mysql+pymysql://{DB_USERNAME}:{DB_PWD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+# Set the database URL in the config
+config.set_main_option('sqlalchemy.url', DATABASE_URL)
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

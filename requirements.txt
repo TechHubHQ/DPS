@@ -40,3 +40,5 @@ urllib3==2.5.0
 watchdog==6.0.0
 sqlalchemy
 alembic
+pymysql
+python-dotenv

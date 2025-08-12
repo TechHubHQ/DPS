@@ -39,7 +39,8 @@ def init_db():
 def get_users():
     db = SessionLocal()
     try:
-        users = db.query(User.id, User.emp_id).order_by(User.emp_id).all()
+        users = db.query(User.id, User.emp_id,
+                         User.emp_name).order_by(User.emp_id).all()
         return users
     finally:
         db.close()
@@ -100,14 +101,14 @@ def clear_old_submissions():
         db.close()
 
 
-def add_user(emp_id):
+def add_user(emp_id, emp_name):
     db = SessionLocal()
     try:
         existing = db.query(User).filter(User.emp_id == emp_id).first()
         if existing:
             return False
 
-        user = User(emp_id=emp_id)
+        user = User(emp_id=emp_id, emp_name=emp_name)
         db.add(user)
         db.commit()
         return True
@@ -137,6 +138,7 @@ def get_poll_stats(date_str):
         from sqlalchemy import func
         stats = db.query(
             User.emp_id,
+            User.emp_name,
             func.coalesce(Submission.submitted, 0).label('submitted')
         ).outerjoin(
             Submission,
@@ -186,7 +188,8 @@ def get_poll_end_time():
     db = SessionLocal()
     try:
         admin = db.query(AdminSettings).filter(AdminSettings.id == 1).first()
-        return admin.poll_end_time if admin else '18:30'
+        # return admin.poll_end_time if admin else '19:30'
+        return '20:30'
     finally:
         db.close()
 
@@ -236,5 +239,48 @@ def set_poll_manually_ended(ended=True):
         if admin:
             admin.poll_manually_ended = ended
             db.commit()
+    finally:
+        db.close()
+
+
+def bulk_add_users(user_data_list):
+    """Add multiple users at once. user_data_list should be [(emp_id, emp_name), ...]"""
+    db = SessionLocal()
+    try:
+        added = []
+        errors = []
+
+        for emp_id, emp_name in user_data_list:
+            try:
+                existing = db.query(User).filter(User.emp_id == emp_id).first()
+                if existing:
+                    errors.append(f"{emp_id} (exists)")
+                    continue
+
+                user = User(emp_id=emp_id, emp_name=emp_name.strip())
+                db.add(user)
+                added.append((emp_id, emp_name))
+            except Exception as e:
+                errors.append(f"{emp_id} (error: {str(e)})")
+
+        if added:
+            db.commit()
+
+        return added, errors
+    except Exception:
+        db.rollback()
+        return [], ["Database error occurred"]
+    finally:
+        db.close()
+
+
+def get_user_by_emp_id(emp_id):
+    """Get user details by employee ID"""
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.emp_id == emp_id).first()
+        if user:
+            return {'id': user.id, 'emp_id': user.emp_id, 'emp_name': user.emp_name}
+        return None
     finally:
         db.close()
