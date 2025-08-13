@@ -20,13 +20,14 @@ import time
 def run_migrations():
     alembic_cfg = Config("alembic.ini")
     command.upgrade(alembic_cfg, "head")
-    # Page configuration
-    st.set_page_config(
-        page_title="Dinner Polling System",
-        page_icon="🍽️",
-        layout="wide",
-        initial_sidebar_state="expanded"
-    )
+
+# Page configuration
+st.set_page_config(
+    page_title="Dinner Polling System",
+    page_icon="polling.ico",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 
 # Load custom CSS
